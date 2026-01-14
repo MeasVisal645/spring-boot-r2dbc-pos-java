@@ -67,7 +67,7 @@ public class OrderItemServiceImpl implements OrderItemService {
                                             .orderId(orderItem.getId())
                                             .productId(product.getId())
                                             .quantity(request.quantity())
-                                            .totalPrice(totalPrice)
+                                            .total(totalPrice)
                                             .build();
 
                                     return orderDetailRepository.save(detail)

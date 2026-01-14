@@ -15,6 +15,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("brand")
 public class Brand {
 
+    public static final String LABEL = "brand";
     public static final String ID_COLUMN = "id";
     public static final String NAME_COLUMN = "name";
 
@@ -28,6 +29,11 @@ public class Brand {
         return Brand.builder()
                 .id(brand.getId())
                 .name(brand.getName());
+    }
+
+    public static Brand update(Brand brand) {
+        brand.setName(brand.getName());
+        return brand;
     }
 
 }
