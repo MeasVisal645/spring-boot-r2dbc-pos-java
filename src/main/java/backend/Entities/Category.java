@@ -21,21 +21,21 @@ import java.time.LocalDateTime;
 public class Category {
 
     public static final String LABEL = "category";
-    public static final String ID_COLUMN = "categoryId";
-    public static final String CATEGORY_CODE_COLUMN = "categoryCode";
-    public static final String CATEGORY_NAME_COLUMN = "categoryName";
-    public static final String STATUS_COLUMN = "status";
+    public static final String ID_COLUMN = "id";
+    public static final String CODE_COLUMN = "code";
+    public static final String NAME_COLUMN = "name";
+    public static final String IS_ACTIVE_COLUMN = "isActive";
     public static final String CREATED_DATE_COLUMN = "createdDate";
     public static final String UPDATED_DATE_COLUMN = "updatedDate";
 
     @Id
     @Column(ID_COLUMN)
     private Long id;
-    @Column(CATEGORY_CODE_COLUMN)
+    @Column(CODE_COLUMN)
     private String code;
-    @Column(CATEGORY_NAME_COLUMN)
+    @Column(NAME_COLUMN)
     private String name;
-    @Column(STATUS_COLUMN)
+    @Column(IS_ACTIVE_COLUMN)
     private boolean isActive;
     @Column(CREATED_DATE_COLUMN)
     @JsonSerialize(using = DateStringUtils.class)

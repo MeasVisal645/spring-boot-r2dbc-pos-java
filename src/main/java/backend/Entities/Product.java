@@ -72,8 +72,7 @@ public class Product {
                 .cost(product.getCost())
                 .price(product.getPrice())
                 .quantity(product.getQuantity())
-                .unit(product.getUnit())
-                .isActive(product.isActive());
+                .unit(product.getUnit());
     }
 
     public static Product update(Product product) {

@@ -23,7 +23,7 @@ public class User {
     public final static String ID_COLUMN = "id";
     public final static String USERNAME_COLUMN = "username";
     public final static String PASSWORD_COLUMN = "password";
-    public final static String USER_ROLE = "role";
+    public final static String ROLE_COLUMN = "role";
     public final static String EMPLOYEE_ID_COLUMN = "employeeId";
     public final static String IS_ACTIVE_COLUMN = "isActive";
     public final static String CREATED_DATE_COLUMN = "createdDate";
@@ -36,12 +36,13 @@ public class User {
     private String username;
     @Column(PASSWORD_COLUMN)
     private String password;
-    @Column(USER_ROLE)
+    @Column(ROLE_COLUMN)
     private Role role;
     @Column(EMPLOYEE_ID_COLUMN)
     private Long employeeId;
     @Column(IS_ACTIVE_COLUMN)
     private boolean isActive;
+    @Column(CREATED_DATE_COLUMN)
     @JsonSerialize(using = DateStringUtils.class)
     private LocalDateTime createdDate;
     @Column(UPDATED_DATE_COLUMN)

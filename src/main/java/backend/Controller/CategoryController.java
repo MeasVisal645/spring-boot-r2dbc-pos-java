@@ -32,7 +32,7 @@ public class CategoryController {
     }
 
     @PutMapping("/update")
-    public Mono<CategoryDto> update(@RequestBody CategoryDto categoryDto) {
-        return categoryService.update(categoryDto);
+    public Mono<Category> update(@RequestBody Category category) {
+        return categoryService.update(category);
     }
 }

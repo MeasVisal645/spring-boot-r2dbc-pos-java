@@ -10,12 +10,10 @@ public class CategoryMapper {
         }
 
         CategoryDto dto = new CategoryDto();
-        dto.setCategoryId(category.getCategoryId());
-        dto.setCategoryCode(category.getCategoryCode());
-        dto.setCategoryName(category.getCategoryName());
-        dto.setStatus(category.isStatus());
-        dto.setCreatedDate(category.getCreatedDate());
-        dto.setUpdatedDate(category.getUpdatedDate());
+        dto.setId(category.getId());
+        dto.setCode(category.getCode());
+        dto.setName(category.getName());
+        dto.setActive(category.isActive());
 
         return dto;
     }
@@ -27,12 +25,10 @@ public class CategoryMapper {
         }
 
         Category entity = new Category();
-        entity.setCategoryId(entity.getCategoryId());
-        entity.setCategoryCode(entity.getCategoryCode());
-        entity.setCategoryName(entity.getCategoryName());
-        entity.setStatus(entity.isStatus());
-        entity.setCreatedDate(entity.getCreatedDate());
-        entity.setUpdatedDate(entity.getUpdatedDate());
+        entity.setId(entity.getId());
+        entity.setCode(entity.getCode());
+        entity.setName(entity.getName());
+        entity.setActive(entity.isActive());
 
         return entity;
     }
