@@ -8,5 +8,6 @@ import java.util.List;
 public record OrderDetails(
         List<OrderItem> orderItems,
         List<OrderDetail> orderDetails
+
 ) {
 }
