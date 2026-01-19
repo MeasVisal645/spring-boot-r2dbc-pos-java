@@ -5,8 +5,6 @@ import backend.Dto.OrderRequest;
 import backend.Entities.*;
 import backend.Repository.OrderDetailRepository;
 import backend.Repository.OrderItemRepository;
-import backend.Repository.ProductRepository;
-import backend.Service.AuditLogService;
 import backend.Service.OrderItemService;
 import backend.Service.UserService;
 import backend.Utils.NestedPaginationUtils;
@@ -28,7 +26,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 @Service
 @AllArgsConstructor
@@ -36,7 +33,6 @@ public class OrderItemServiceImpl implements OrderItemService {
 
     private final OrderItemRepository orderItemRepository;
     private final OrderDetailRepository orderDetailRepository;
-    private final AuditLogService auditLogService;
     private final UserService userService;
     private final R2dbcEntityTemplate r2dbcEntityTemplate;
 
@@ -140,10 +136,6 @@ public class OrderItemServiceImpl implements OrderItemService {
                                 })
                         )
                         .collectList()
-                        .flatMap(saved ->
-                                auditLogService.logAction(userId, "CREATED_ORDER_ITEM: " + orderNo)
-                                    .thenReturn(saved)
-                        )
                 )
             );
     }
