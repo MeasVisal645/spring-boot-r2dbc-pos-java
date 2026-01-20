@@ -57,14 +57,12 @@ public class JwtUtil {
     }
 
     public Long extractUserId(String token) {
-        Number id = (Number) Jwts.parserBuilder()
+        return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .get("id");
-
-        return id != null ? id.longValue() : null;
+                .get("id", Long.class);
     }
 
 
