@@ -50,7 +50,7 @@ public class Product {
     @Column(QUANTITY_COLUMN)
     private int quantity;
     @Column(UNIT_COLUMN)
-    private String unit;
+    private Unit unit;
     @Column(CATEGORY_ID_COLUMN)
     private Long categoryId;
     @Column(BRAND_ID_COLUMN)

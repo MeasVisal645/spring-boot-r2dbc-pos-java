@@ -25,29 +25,6 @@ public class JwtAuthenticationFilter implements WebFilter {
     private final JwtUtil jwtUtil;
 
     @NotNull
-//    @Override
-//    public Mono<Void> filter(ServerWebExchange exchange, @NotNull WebFilterChain chain) {
-//        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-//        if (authHeader != null && authHeader.startsWith("Bearer ")) { // Bearer Prefix
-//            String token = authHeader.substring(7);
-//
-//            if (jwtUtil.validateToken(token)) {
-//                String username = jwtUtil.extractUsername(token);
-//                String role = jwtUtil.extractRole(token);
-//
-//                UsernamePasswordAuthenticationToken authentication =
-//                        new UsernamePasswordAuthenticationToken(username, null,
-//                                List.of(() -> role));
-//
-//                return chain.filter(exchange)
-//                        .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(
-//                                Mono.just(new SecurityContextImpl(authentication))
-//                        ));
-//            }
-//        }
-//        return chain.filter(exchange);
-//    }
-
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 

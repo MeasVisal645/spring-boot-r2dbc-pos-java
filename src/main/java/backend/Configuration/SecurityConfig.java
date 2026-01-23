@@ -33,10 +33,6 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/api/v1/product/**").hasAnyRole("ROLE_ADMIN", "ROLE_USER")
-                        .pathMatchers("/api/v1/category/**").hasAnyRole("ROLE_ADMIN", "ROLE_USER")
-                        .pathMatchers("/api/v1/expense/**").hasAnyRole("ROLE_ADMIN", "ROLE_USER")
-                        .pathMatchers("/api/v1/order/**").hasAnyRole("ROLE_ADMIN", "ROLE_USER")
                         .pathMatchers("/api/v1/user/me").hasAnyRole("ROLE_ADMIN", "ROLE_USER")
                         .pathMatchers("/api/v1/user/**").hasRole("ROLE_ADMIN")
                         .pathMatchers("/api/v1/auth/**").permitAll()

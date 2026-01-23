@@ -32,7 +32,7 @@ public class AuditLogFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getPath().value();
         String method = exchange.getRequest().getMethod().name();
-        String param = exchange.getRequest().getURI().toString();
+        String param = exchange.getRequest().getURI().toString().substring(29);
         String ipAddress = getClientIp(exchange);
         String userAgent = exchange.getRequest().getHeaders().getFirst("User-Agent");
         Long userId = getCurrentUserId(exchange);
@@ -40,7 +40,7 @@ public class AuditLogFilter implements WebFilter {
         return chain.filter(exchange)
                 .then(repository.save(AuditLog.builder()
                         .userId(userId)
-                        .action(method + " " + path + param)
+                        .action(method + " " + path)
                         .ipAddress(ipAddress)
                         .userAgent(userAgent)
                         .timestamp(LocalDateTime.now())
