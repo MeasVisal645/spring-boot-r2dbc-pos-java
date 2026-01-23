@@ -52,8 +52,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeRepository.save(Employee.from(employee)
                 .createdDate(LocalDateTime.now())
                 .isActive(true)
-                .build()
-        );
+                .build());
     }
 
     @Override
