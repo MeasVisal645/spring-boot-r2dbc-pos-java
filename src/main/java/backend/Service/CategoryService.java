@@ -4,6 +4,7 @@ import backend.Dto.CategoryDto;
 import backend.Dto.CategoryProduct;
 import backend.Entities.Category;
 import backend.Utils.PageResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,7 +18,8 @@ public interface CategoryService {
     Mono<Category> update(Category category);
     Mono<Long> delete(Long id);
 
-    Mono<PageResponse<CategoryProduct>> findPagination(Integer pageNumber, Integer pageSize);
+    Mono<PageResponse<CategoryDto>> findPagination(Integer pageNumber, Integer pageSize);
+    Mono<PageResponse<CategoryProduct>> findNestedPagination(Integer pageNumber, Integer pageSize);
 
 
 }

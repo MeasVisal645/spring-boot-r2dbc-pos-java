@@ -58,12 +58,12 @@ public class Employee {
                 .updatedDate(employee.getUpdatedDate());
     }
 
-    public static Employee update(Employee employee) {
-        employee.setFirstName(employee.getFirstName());
-        employee.setLastName(employee.getLastName());
-        employee.setEmail(employee.getEmail());
-        employee.setActive(employee.isActive());
-        return employee;
+    public static Employee update(Employee existingEmployee, Employee updatedEmployee) {
+        existingEmployee.setFirstName(updatedEmployee.getFirstName());
+        existingEmployee.setLastName(updatedEmployee.getLastName());
+        existingEmployee.setEmail(updatedEmployee.getEmail());
+        existingEmployee.setActive(updatedEmployee.isActive());
+        return existingEmployee;
     }
 
 }

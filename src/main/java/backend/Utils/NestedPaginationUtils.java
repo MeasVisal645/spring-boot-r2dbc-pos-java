@@ -1,5 +1,7 @@
 package backend.Utils;
 
+import backend.Dto.CategoryProduct;
+import backend.Entities.Category;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,8 +22,6 @@ public class NestedPaginationUtils {
             R2dbcEntityTemplate template,
             Class<P> primaryClass,
             String activeColumn,
-//          for Dynamic filter value
-//            Object activeColumnValue,
             int pageNumber,
             int pageSize,
             Function<P, Mono<List<C>>> fetchSecondary,
@@ -32,29 +32,15 @@ public class NestedPaginationUtils {
         long offset = (long) (page - 1) * size;
 
         Query baseQuery = Query.query(Criteria.where(activeColumn).isTrue());
-
-//        for Dynamic filter value
-//        Query baseQuery = Query.query(Criteria.where(activeColumn).is(activeColumnValue));
-
         Mono<Long> countMono = template.count(baseQuery, primaryClass);
-        // Without Mapper
-//        Flux<R> contentFlux = template.select(primaryClass)
-//                .matching(baseQuery.limit(size).offset(offset))
-//                .all()
-//                .flatMap(primary ->
-//                        fetchSecondary.apply(primary)
-//                                .map(secondary -> resultMapper.apply(primary, secondary))
-//                );
 
-        // With Mapper
         Flux<R> contentFlux = template.select(primaryClass)
                 .matching(baseQuery.limit(size).offset(offset))
                 .all()
                 .flatMap(primary ->
-                        fetchSecondary.apply(primary)                       // P -> Mono<List<C>>
-                                .map(children -> resultMapper.apply(primary, children)) // combine to R
+                        fetchSecondary.apply(primary)
+                                .map(children -> resultMapper.apply(primary, children))
                 );
-
 
         return countMono.flatMap(total ->
                 contentFlux.collectList()

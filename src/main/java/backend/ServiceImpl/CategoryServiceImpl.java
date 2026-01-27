@@ -11,6 +11,7 @@ import backend.Utils.NestedPaginationUtils;
 import backend.Utils.PageResponse;
 import backend.Utils.PaginationUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
@@ -90,7 +91,21 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Mono<PageResponse<CategoryProduct>> findPagination(Integer pageNumber, Integer pageSize) {
+    public Mono<PageResponse<CategoryDto>> findPagination(Integer pageNumber, Integer pageSize) {
+        return PaginationUtils.fetchPagedResponse(
+                r2dbcEntityTemplate,
+                Category.class,
+                CategoryMapper::toDto,
+                Optional.ofNullable(pageNumber).orElse(PaginationUtils.DEFAULT_PAGE_NUMBER),
+                Optional.ofNullable(pageSize).orElse(PaginationUtils.DEFAULT_LIMIT),
+                Category.IS_ACTIVE_COLUMN,
+                Sort.by(Sort.Order.desc(Category.CREATED_DATE_COLUMN),
+                        Sort.Order.desc(Category.UPDATED_DATE_COLUMN))
+        );
+    }
+
+    @Override
+    public Mono<PageResponse<CategoryProduct>> findNestedPagination(Integer pageNumber, Integer pageSize) {
         return NestedPaginationUtils.fetchPagination(
                 r2dbcEntityTemplate,
                 Category.class,

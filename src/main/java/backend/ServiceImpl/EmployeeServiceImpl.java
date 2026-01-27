@@ -59,7 +59,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public Mono<Employee> update(Employee employee) {
         return employeeRepository.findById(employee.getId())
                 .flatMap(existingEmployee -> {
-                        Employee.update(existingEmployee)
+                        Employee.update(existingEmployee, employee)
                                 .setUpdatedDate(LocalDateTime.now());
                     return employeeRepository.save(existingEmployee);
                 });

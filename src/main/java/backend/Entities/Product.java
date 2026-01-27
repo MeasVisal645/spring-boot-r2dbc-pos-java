@@ -75,14 +75,14 @@ public class Product {
                 .unit(product.getUnit());
     }
 
-    public static Product update(Product product) {
-        product.setName(product.getName());
-        product.setCode(product.getCode());
-        product.setCost(product.getCost());
-        product.setPrice(product.getPrice());
-        product.setQuantity(product.getQuantity());
-        product.setUnit(product.getUnit());
-        product.setActive(product.isActive());
-        return product;
+    public static Product update(Product existingProduct, Product updatedProduct) {
+        existingProduct.setName(updatedProduct.getName());
+        existingProduct.setCode(updatedProduct.getCode());
+        existingProduct.setCost(updatedProduct.getCost());
+        existingProduct.setPrice(updatedProduct.getPrice());
+        existingProduct.setQuantity(updatedProduct.getQuantity());
+        existingProduct.setUnit(updatedProduct.getUnit());
+        existingProduct.setActive(updatedProduct.isActive());
+        return existingProduct;
     }
 }

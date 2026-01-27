@@ -44,7 +44,12 @@ public class CategoryController {
     }
 
     @GetMapping
-    public Mono<PageResponse<CategoryProduct>> findPagination(@RequestParam Integer pageNumber, Integer pageSize) {
+    public Mono<PageResponse<CategoryDto>> findPagination(@RequestParam Integer pageNumber, Integer pageSize) {
         return categoryService.findPagination(pageNumber, pageSize);
+    }
+
+    @GetMapping("/detail")
+    public Mono<PageResponse<CategoryProduct>> findNestedPagination(@RequestParam Integer pageNumber, Integer pageSize) {
+        return categoryService.findNestedPagination(pageNumber, pageSize);
     }
 }

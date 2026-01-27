@@ -85,23 +85,11 @@ public class UserServiceImpl implements UserService {
         var encodedPassword = passwordEncoder.encode(user.getPassword());
 
         return employeeRepository.findById(user.getEmployeeId())
-                .switchIfEmpty(Mono.error(
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Employee not found"
-                        )
-                ))
-                .flatMap(employee ->
-                        userRepository.existsById(user.getEmployeeId())
-                )
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found")))
+                .flatMap(employee -> userRepository.existsById(user.getEmployeeId()))
                 .flatMap(exists -> {
                     if (exists) {
-                        return Mono.error(
-                                new ResponseStatusException(
-                                        HttpStatus.CONFLICT,
-                                        "Employee already has a user account"
-                                )
-                        );
+                        return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT, "Employee already has a user account"));
                     }
 
                     return userRepository.save(

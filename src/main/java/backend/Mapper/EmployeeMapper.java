@@ -17,7 +17,7 @@ public class EmployeeMapper {
         dto.setFirstName(employee.getFirstName());
         dto.setLastName(employee.getLastName());
         dto.setEmail(employee.getEmail());
-//        dto.setActive(employee.isActive());
+        dto.setActive(employee.isActive());
         return dto;
     }
 

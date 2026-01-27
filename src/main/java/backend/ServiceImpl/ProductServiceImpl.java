@@ -37,11 +37,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Flux<ProductDto> findAll() {
-        return repositoryUtils.findAllActive(r2dbcEntityTemplate,
-                                            Product.class,
-                                            Product.IS_ACTIVE_COLUMN,
-                                            Product.LABEL)
+        return productRepository.findAll()
                 .map(ProductMapper::toDto);
+
+//        return repositoryUtils.findAllActive(r2dbcEntityTemplate,
+//                                            Product.class,
+//                                            Product.IS_ACTIVE_COLUMN,
+//                                            Product.LABEL)
+//                .map(ProductMapper::toDto);
     }
 
     @Override
@@ -98,7 +101,7 @@ public class ProductServiceImpl implements ProductService {
                         new ResponseStatusException(HttpStatus.NOT_FOUND,"Product not found")
                 ))
                 .flatMap(existingProduct -> {
-                    Product.update(existingProduct);
+                    Product.update(existingProduct, product);
                     existingProduct.setUpdatedDate(LocalDateTime.now());
                     return productRepository.save(existingProduct);
                 });

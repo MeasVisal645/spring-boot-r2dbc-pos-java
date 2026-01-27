@@ -1,6 +1,7 @@
 package backend.Dto;
 
 import backend.Entities.Product;
+import backend.Entities.Unit;
 import backend.Utils.DateStringUtils;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ public class ProductDto {
     private String name;
     private BigDecimal price;
     private int quantity;
+    private Unit unit;
     private boolean isActive;
 
 }

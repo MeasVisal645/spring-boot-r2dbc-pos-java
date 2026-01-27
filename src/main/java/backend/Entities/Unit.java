@@ -4,12 +4,12 @@ import lombok.Getter;
 
 @Getter
 public enum Unit {
-    PCS("pcs"),
-    SET("set"),
-    CASE("case"),
-    KG("kg"),
-    BOTTLE("bottle"),
-    BOX("box");
+    PCS("PCS"),
+    SET("SET"),
+    CASE("CASE"),
+    KG("KG"),
+    BOTTLE("BOTTLE"),
+    BOX("BOX");
 
     public final String value;
 
