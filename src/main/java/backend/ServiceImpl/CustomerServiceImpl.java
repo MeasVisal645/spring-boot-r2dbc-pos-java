@@ -52,7 +52,7 @@ public class CustomerServiceImpl implements CustomerService {
     public Mono<Customer> update(Customer customer) {
         return customerRepository.findById(customer.getId())
                 .map(existingCustomer -> {
-                    Customer.update(existingCustomer)
+                    Customer.update(existingCustomer, customer)
                             .setUpdatedDate(LocalDateTime.now());
                     return existingCustomer;
                 });
