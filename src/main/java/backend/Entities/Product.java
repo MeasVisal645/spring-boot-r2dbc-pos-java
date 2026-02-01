@@ -72,7 +72,9 @@ public class Product {
                 .cost(product.getCost())
                 .price(product.getPrice())
                 .quantity(product.getQuantity())
-                .unit(product.getUnit());
+                .unit(product.getUnit())
+                .categoryId(product.getCategoryId())
+                .brandId(product.getBrandId());
     }
 
     public static Product update(Product existingProduct, Product updatedProduct) {
