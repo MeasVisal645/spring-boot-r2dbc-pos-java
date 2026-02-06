@@ -27,17 +27,21 @@ public class EmployeeMapper {
 
     // Convert from DTO to Entity
     public static Employee toEntity(EmployeeDto dto) {
-        if (dto == null) {
-            return null;
-        }
+        if (dto == null) return null;
 
         Employee entity = new Employee();
-        entity.setId(entity.getId());
-        entity.setFirstName(entity.getFirstName());
-        entity.setLastName(entity.getLastName());
-        entity.setEmail(entity.getEmail());
-//        entity.setActive(entity.isActive());
+        entity.setId(dto.getId());
+        entity.setFirstName(dto.getFirstName());
+        entity.setLastName(dto.getLastName());
+        entity.setEmail(dto.getEmail());
+        entity.setPhone(dto.getPhone());
+        entity.setNatId(dto.getNatId());
+        entity.setNssfId(dto.getNssfId());
+        entity.setActive(dto.isActive());
+        entity.setImageUrl(dto.getImageUrl());
 
         return entity;
     }
+
+
 }

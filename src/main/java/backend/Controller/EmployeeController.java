@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/employee")
@@ -30,10 +32,10 @@ public class EmployeeController {
         return employeeService.findById(id);
     }
 
-    @PostMapping("/create")
-    private Mono<Employee> create(@RequestBody Employee employee) {
-        return employeeService.create(employee);
-    }
+//    @PostMapping("/create")
+//    private Mono<Employee> create(@RequestBody Employee employee) {
+//        return employeeService.create(employee);
+//    }
 
     @PutMapping("/update")
     private Mono<Employee> update(@RequestBody Employee employee) {
@@ -50,9 +52,17 @@ public class EmployeeController {
         return employeeService.findPagination(pageNumber, pageSize);
     }
 
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Mono<EmployeeDto> createWithImage(
+            @RequestPart("data") Mono<EmployeeDto> data,
+            @RequestPart(value = "image", required = false) Mono<FilePart> image
+    ) {
+        return data.flatMap(dto -> employeeService.createWithImage(dto, image));
+    }
+
     @PostMapping(path = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Mono<String> uploadImage(@PathVariable Long id, @RequestPart("file")FilePart file) {
-        return employeeService.uploadImage(id, file);
+    public Mono<String> updateImage(@PathVariable Long id, @RequestPart("file")FilePart file) {
+        return employeeService.updateImage(id, file);
     }
 
 

@@ -12,7 +12,6 @@ import backend.Service.FileService;
 import backend.Utils.NestedPaginationUtils;
 import backend.Utils.PageResponse;
 import backend.Utils.PaginationUtils;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
@@ -25,9 +24,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -66,22 +63,50 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Mono<String> uploadImage(Long id, FilePart file) {
+    public Mono<EmployeeDto> createWithImage(EmployeeDto dto, Mono<FilePart> file) {
+
+        Employee entity = EmployeeMapper.toEntity(dto);
+        entity.setActive(true);
+        entity.setCreatedDate(LocalDateTime.now());
+
+        return employeeRepository.save(entity)
+                .flatMap(emp -> file
+                                .flatMap(filePart -> {
+                                    String imageKey = "employee/profile/" + emp.getId();
+                                    String imageUrl = publicUrl + "/" + imageKey;
+
+                                    return fileService.uploadFile(imageKey, filePart)
+                                            .then(Mono.defer(() -> {
+                                                emp.setImageKey(imageKey);
+                                                emp.setImageUrl(imageUrl);
+                                                return employeeRepository.save(emp);
+                                            }))
+                                            .onErrorResume(e ->
+                                                    fileService.deleteFile(imageKey)
+                                                            .then(Mono.error(e)));
+                                })
+                                .switchIfEmpty(Mono.just(emp))
+                )
+                .map(EmployeeMapper::toDto);
+    }
+
+    @Override
+    public Mono<String> updateImage(Long id, FilePart file) {
         String imageKey = "employee/profile/" + id;
         String imageUrl = publicUrl + "/" + imageKey;
 
         return employeeRepository.findById(id)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found")))
                 .flatMap(employee -> {
-//                    String oldKey = employee.getImageKey();
-//
-//                    Mono<Void> deleteOld = (oldKey == null || oldKey.isBlank())
-//                            ? Mono.empty()
-//                            : fileService.deleteFile(oldKey)
-//                            .onErrorResume(e -> Mono.empty());
+                    String oldKey = employee.getImageKey();
+
+                    Mono<Void> deleteOld = (oldKey == null || oldKey.isBlank())
+                            ? Mono.empty()
+                            : fileService.deleteFile(oldKey)
+                            .onErrorResume(e -> Mono.empty());
 
                     return fileService.uploadFile(imageKey, file)
-//                            .then(deleteOld)
+                            .then(deleteOld)
                             .then(Mono.defer(() -> {
                                 employee.setImageKey(imageKey);
                                 employee.setImageUrl(imageUrl);
