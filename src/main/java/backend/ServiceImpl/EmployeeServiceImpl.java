@@ -7,6 +7,7 @@ import backend.Entities.User;
 import backend.Mapper.EmployeeMapper;
 import backend.Mapper.UserMapper;
 import backend.Repository.EmployeeRepository;
+import backend.Repository.UserRepository;
 import backend.Service.EmployeeService;
 import backend.Service.FileService;
 import backend.Utils.NestedPaginationUtils;
@@ -30,12 +31,14 @@ import java.util.Optional;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final UserRepository userRepository;
     private final R2dbcEntityTemplate r2dbcEntityTemplate;
     private final FileService fileService;
     private final String publicUrl;
 
-    public EmployeeServiceImpl(EmployeeRepository employeeRepository, R2dbcEntityTemplate r2dbcEntityTemplate, FileService fileService,@Value("${r2.publicUrl}")  String publicUrl) {
+    public EmployeeServiceImpl(EmployeeRepository employeeRepository, UserRepository userRepository, R2dbcEntityTemplate r2dbcEntityTemplate, FileService fileService,@Value("${r2.publicUrl}")  String publicUrl) {
         this.employeeRepository = employeeRepository;
+        this.userRepository = userRepository;
         this.r2dbcEntityTemplate = r2dbcEntityTemplate;
         this.fileService = fileService;
         this.publicUrl = publicUrl;
@@ -128,14 +131,23 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Mono<Long> delete(Long id) {
+    public Mono<Void> delete(Long id) {
         return employeeRepository.findById(id)
+                // validate existing id
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found")))
-                .flatMap(employee ->
-                            employeeRepository.deleteById(id)
-                                    .thenReturn(id)
-                        );
+                .flatMap(employee -> {
+                    String oldKey = employee.getImageKey();
+
+                    Mono<Void> deleteFile = (oldKey == null || oldKey.isBlank())
+                            ? Mono.empty()
+                            : fileService.deleteFile(oldKey).onErrorResume(e -> Mono.empty());
+
+                    return deleteFile
+                            .then(employeeRepository.deleteById(id))
+                            .then(userRepository.deleteByEmployeeId(id));
+                });
     }
+
 
     @Override
     public Mono<PageResponse<EmployeeUser>> findPagination(Integer pageNumber, Integer pageSize) {

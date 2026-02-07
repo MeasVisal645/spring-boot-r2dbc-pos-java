@@ -17,7 +17,7 @@ public interface EmployeeService {
     Mono<Employee> findById(Long id);
     Mono<Employee> create(Employee employee);
     Mono<Employee> update(Employee employee);
-    Mono<Long> delete(Long id);
+    Mono<Void> delete(Long id);
     Mono<EmployeeDto> createWithImage(EmployeeDto dto, Mono<FilePart> imageMono);
     Mono<String> updateImage(Long id, FilePart file);
     Mono<PageResponse<EmployeeUser>> findPagination(Integer pageNumber, Integer pageSize);

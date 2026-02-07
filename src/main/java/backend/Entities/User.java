@@ -25,7 +25,6 @@ public class User{
     public final static String PASSWORD_COLUMN = "password";
     public final static String ROLE_COLUMN = "role";
     public final static String EMPLOYEE_ID_COLUMN = "employeeId";
-    public final static String IMAGE_ID_COLUMN = "imageId";
     public final static String IS_ACTIVE_COLUMN = "isActive";
     public final static String CREATED_DATE_COLUMN = "createdDate";
     public final static String UPDATED_DATE_COLUMN = "updatedDate";
@@ -41,8 +40,6 @@ public class User{
     private Role role;
     @Column(EMPLOYEE_ID_COLUMN)
     private Long employeeId;
-//    @Column(IMAGE_ID_COLUMN)
-//    private Long imageId;
     @Column(IS_ACTIVE_COLUMN)
     private boolean isActive;
     @Column(CREATED_DATE_COLUMN)
