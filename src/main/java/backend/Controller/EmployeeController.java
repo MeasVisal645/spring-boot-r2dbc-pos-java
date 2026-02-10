@@ -43,7 +43,7 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/delete")
-    public Mono<Long> delete(@RequestParam Long id) {
+    public Mono<Void> delete(@RequestParam Long id) {
         return employeeService.delete(id);
     }
 
