@@ -9,4 +9,6 @@ import reactor.core.publisher.Mono;
 public interface UserRepository extends R2dbcRepository<User, Long> {
     Mono<User> findByUsername(String username);
     Mono<Void> deleteByEmployeeId(Long employeeId);
+    Mono<Boolean> existsByEmployeeId(Long employeeId);
+
 }
