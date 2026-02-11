@@ -26,5 +26,6 @@ public class ProductDto {
     private Unit unit;
     private boolean isActive;
     private String imageUrl;
+    private Long categoryId;
 
 }

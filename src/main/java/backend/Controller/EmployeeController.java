@@ -42,8 +42,8 @@ public class EmployeeController {
         return employeeService.update(employee);
     }
 
-    @DeleteMapping("/delete")
-    public Mono<Void> delete(@RequestParam Long id) {
+    @DeleteMapping("/delete/{id}")
+    public Mono<Void> delete(@PathVariable Long id) {
         return employeeService.delete(id);
     }
 
