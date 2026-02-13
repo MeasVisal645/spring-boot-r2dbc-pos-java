@@ -2,6 +2,7 @@ package backend.ServiceImpl;
 
 import backend.Dto.OrderDetails;
 import backend.Dto.OrderRequest;
+import backend.Dto.SalesData;
 import backend.Entities.*;
 import backend.Repository.OrderDetailRepository;
 import backend.Repository.OrderItemRepository;
@@ -47,18 +48,48 @@ public class OrderItemServiceImpl implements OrderItemService {
                 );
     }
 
+//    @Override
+//    public Flux<OrderDetails> findByOrderNo(String orderNo) {
+//        return orderItemRepository.findByOrderNo(orderNo)
+//                .switchIfEmpty(Mono.error(
+//                        new ResponseStatusException(HttpStatus.NOT_FOUND,"Order not found")
+//                ))
+//                .flatMap(orderItem ->
+//                        orderDetailRepository.findByOrderId(orderItem.getId())
+//                                .collectList()
+//                                .map(orderDetails -> new OrderDetails(orderItem, orderDetails))
+//                );
+//    }
+
     @Override
-    public Flux<OrderDetails> findByOrderNo(String orderNo) {
-        return orderItemRepository.findByOrderNo(orderNo)
-                .switchIfEmpty(Mono.error(
-                        new ResponseStatusException(HttpStatus.NOT_FOUND,"Order not found")
+    public Flux<SalesData> findAllSales(LocalDateTime startDate, LocalDateTime endDate) {
+
+        return r2dbcEntityTemplate.select(OrderItem.class)
+                .matching(Query.query(
+                        Criteria.where(OrderItem.CREATED_DATE_COLUMN)
+                                .between(startDate, endDate)
+                                .and(OrderItem.IS_PAID_COLUMN).isTrue()
                 ))
+                .all()
+
                 .flatMap(orderItem ->
-                        orderDetailRepository.findByOrderId(orderItem.getId())
-                                .collectList()
-                                .map(orderDetails -> new OrderDetails(orderItem, orderDetails))
+                        r2dbcEntityTemplate.select(OrderDetail.class)
+                                .matching(Query.query(
+                                        Criteria.where(OrderDetail.ORDER_ID_COLUMN)
+                                                .is(orderItem.getId())
+                                ))
+                                .all()
+                                .map(OrderDetail::getTotal)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                                .map(total ->
+                                        new SalesData(total, orderItem.getCreatedDate())
+                                )
                 );
+
     }
+
+
+
 
     @Override
     public Mono<PageResponse<OrderDetails>> findPagination(Integer pageNumber, Integer pageSize) {
