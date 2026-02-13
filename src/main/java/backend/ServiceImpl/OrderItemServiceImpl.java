@@ -12,6 +12,7 @@ import backend.Utils.OrderNoGenerator;
 import backend.Utils.PageResponse;
 import backend.Utils.PaginationUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
@@ -61,15 +62,13 @@ public class OrderItemServiceImpl implements OrderItemService {
 
     @Override
     public Mono<PageResponse<OrderDetails>> findPagination(Integer pageNumber, Integer pageSize) {
-
         return NestedPaginationUtils.fetchPagination(
                 r2dbcEntityTemplate,
                 OrderItem.class,
                 OrderItem.IS_PAID_COLUMN,
                 Optional.ofNullable(pageNumber).orElse(PaginationUtils.DEFAULT_PAGE_NUMBER),
                 Optional.ofNullable(pageSize).orElse(PaginationUtils.DEFAULT_LIMIT),
-
-                // Function to fetch OrderDetails for each OrderItem
+                Sort.by(Sort.Order.desc(OrderItem.CREATED_DATE_COLUMN)),
                 orderItem -> r2dbcEntityTemplate.select(OrderDetail.class)
                         .matching(Query.query(
                                 Criteria.where(OrderDetail.ORDER_ID_COLUMN)

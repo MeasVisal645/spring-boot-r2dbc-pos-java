@@ -1,6 +1,7 @@
 package backend.ServiceImpl;
 
 import backend.Dto.SupplierDetails;
+import backend.Entities.OrderItem;
 import backend.Entities.Supplier;
 import backend.Entities.SupplierContact;
 import backend.Repository.SupplierRepository;
@@ -9,6 +10,7 @@ import backend.Utils.NestedPaginationUtils;
 import backend.Utils.PageResponse;
 import backend.Utils.PaginationUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
@@ -36,7 +38,7 @@ public class SupplierServiceImpl implements SupplierService {
                 Supplier.IS_ACTIVE_COLUMN,
                 Optional.ofNullable(pageNumber).orElse(PaginationUtils.DEFAULT_PAGE_NUMBER),
                 Optional.ofNullable(pageSize).orElse(PaginationUtils.DEFAULT_LIMIT),
-
+                Sort.by(Sort.Order.desc(Supplier.CREATED_DATE_COLUMN)),
                 supplier -> r2dbcEntityTemplate.select(SupplierContact.class)
                         .matching(Query.query(Criteria.where(SupplierContact.SUPPLIER_ID_COLUMN).is(supplier.getId())))
                         .all()

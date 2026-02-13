@@ -3,6 +3,7 @@ package backend.ServiceImpl;
 import backend.Dto.EmployeeDto;
 import backend.Dto.EmployeeUser;
 import backend.Entities.Employee;
+import backend.Entities.OrderItem;
 import backend.Entities.User;
 import backend.Mapper.EmployeeMapper;
 import backend.Mapper.UserMapper;
@@ -14,6 +15,7 @@ import backend.Utils.NestedPaginationUtils;
 import backend.Utils.PageResponse;
 import backend.Utils.PaginationUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
@@ -157,6 +159,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 Employee.IS_ACTIVE_COLUMN,
                 Optional.ofNullable(pageNumber).orElse(PaginationUtils.DEFAULT_PAGE_NUMBER),
                 Optional.ofNullable(pageSize).orElse(PaginationUtils.DEFAULT_LIMIT),
+                Sort.by(Sort.Order.desc(Employee.CREATED_DATE_COLUMN)),
                 employee -> r2dbcEntityTemplate.select(User.class)
                         .matching(Query.query(Criteria.where(User.EMPLOYEE_ID_COLUMN).is(employee.getId())))
                         .all()
