@@ -1,5 +1,6 @@
 package backend.Utils;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
@@ -17,25 +18,33 @@ public class NestedPaginationUtils {
             R2dbcEntityTemplate template,
             Class<P> primaryClass,
             String activeColumn,
-            int pageNumber,
-            int pageSize,
+            Integer pageNumber,
+            Integer pageSize,
+
+            // ✅ pass Sort directly
+            Sort sort,
+
             Function<P, Mono<List<C>>> fetchSecondary,
             BiFunction<P, List<C>, R> resultMapper
     ) {
-        // 1. Set Defaults
         int page = Optional.ofNullable(pageNumber).orElse(PaginationUtils.DEFAULT_PAGE_NUMBER);
         int size = Optional.ofNullable(pageSize).orElse(PaginationUtils.DEFAULT_LIMIT);
         long offset = (long) (page - 1) * size;
 
-        // 2. Build Base Query
         Query baseQuery = Query.query(Criteria.where(activeColumn).isTrue());
 
-        // 3. Get Total Count (with filters applied)
         Mono<Long> countMono = template.count(baseQuery, primaryClass);
 
-        // 4. Fetch Paginated Content (with filters applied)
+        Query contentQuery = baseQuery
+                .limit(size)
+                .offset(offset);
+
+        if (sort != null && sort.isSorted()) {
+            contentQuery = contentQuery.sort(sort);
+        }
+
         Flux<R> contentFlux = template.select(primaryClass)
-                .matching(baseQuery.limit(size).offset(offset))
+                .matching(contentQuery)
                 .all()
                 .flatMap(primary ->
                         fetchSecondary.apply(primary)
@@ -44,14 +53,7 @@ public class NestedPaginationUtils {
 
         return countMono.flatMap(total ->
                 contentFlux.collectList()
-                        .map(content ->
-                                new PageResponse<>(
-                                        content,
-                                        page,
-                                        size,
-                                        total
-                                )
-                        )
+                        .map(content -> new PageResponse<>(content, page, size, total))
         );
     }
 }
