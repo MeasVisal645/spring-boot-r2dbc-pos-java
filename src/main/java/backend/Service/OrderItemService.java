@@ -17,8 +17,8 @@ import java.util.List;
 public interface OrderItemService {
 
     Flux<OrderDetails> findAll();
-//    Flux<OrderDetails> findByOrderNo(String orderNo);
 
+    Flux<OrderItem> findByDate(LocalDateTime startDate, LocalDateTime endDate);
     Flux<SalesData> findAllSales(LocalDateTime startDate, LocalDateTime endDate);
     Mono<PageResponse<OrderDetails>> findPagination(Integer pageNumber, Integer pageSize);
     Mono<List<OrderDetail>> createOrder(List<OrderRequest> orderRequest);

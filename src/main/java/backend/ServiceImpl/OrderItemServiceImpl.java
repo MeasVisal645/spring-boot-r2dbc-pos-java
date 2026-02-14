@@ -48,6 +48,13 @@ public class OrderItemServiceImpl implements OrderItemService {
                 );
     }
 
+    @Override
+    public Flux<OrderItem> findByDate(LocalDateTime startDate, LocalDateTime endDate) {
+        return r2dbcEntityTemplate.select(OrderItem.class)
+                .matching(Query.query(Criteria.where(OrderItem.CREATED_DATE_COLUMN).between(startDate, endDate)))
+                .all();
+    }
+
 //    @Override
 //    public Flux<OrderDetails> findByOrderNo(String orderNo) {
 //        return orderItemRepository.findByOrderNo(orderNo)

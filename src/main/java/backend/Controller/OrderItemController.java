@@ -31,10 +31,10 @@ public class OrderItemController {
         return orderItemService.findAll();
     }
 
-//    @GetMapping("/{orderNo}")
-//    public Flux<OrderDetails> findByOrderNo(@RequestParam String orderNo) {
-//        return orderItemService.findByOrderNo(orderNo);
-//    }
+    @GetMapping("/filter")
+    public Flux<OrderItem> findByDate(@RequestParam LocalDateTime startDate, @RequestParam LocalDateTime endDate) {
+        return orderItemService.findByDate(startDate, endDate);
+    }
 
     @GetMapping("/date")
     public Flux<SalesData> findAllSales(
