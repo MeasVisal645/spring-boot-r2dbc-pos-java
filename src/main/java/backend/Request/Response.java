@@ -1,6 +1,7 @@
 package backend.Request;
 
 public record Response(
-        String token
+        String accessToken,
+        String refreshToken
 ) {
 }

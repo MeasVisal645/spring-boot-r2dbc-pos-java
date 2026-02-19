@@ -1,7 +1,6 @@
 package backend.ServiceImpl;
 
 import backend.Dto.UserDto;
-import backend.Entities.Brand;
 import backend.Entities.CustomUserDetails;
 import backend.Entities.Role;
 import backend.Entities.User;
@@ -45,31 +44,44 @@ public class UserServiceImpl implements UserService {
 
         if (request.username() == null || request.username().isBlank()
                 || request.password() == null || request.password().isBlank()) {
-            return Mono.error(
-                    new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username or password is required")
-            );
+            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username or password is required"));
         }
 
         return userRepository.findByUsername(request.username())
-                .switchIfEmpty(Mono.error(
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
-                ))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")))
                 .flatMap(user -> {
 
                     if (!user.isActive()) {
-                        return Mono.error(
-                                new ResponseStatusException(HttpStatus.FORBIDDEN, "User account is inactive")
-                        );
+                        return Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN, "User account is inactive"));
                     }
 
                     if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-                        return Mono.error(
-                                new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials")
-                        );
+                        return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
                     }
-                    return Mono.just(new Response(jwtUtil.generateToken(user)));
+
+                    String access = jwtUtil.generateAccessToken(user);
+                    String refresh = jwtUtil.generateRefreshToken(user);
+
+                    return Mono.just(new Response(access, refresh));
                 });
     }
+
+
+    @Override
+    public Mono<Response> refreshToken(String refreshToken) {
+
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token is required"));
+        }
+
+        try {
+            String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
+            return Mono.just(new Response(newAccessToken, null));
+        } catch (Exception e) {
+            return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token"));
+        }
+    }
+
 
     @Override
     public Flux<UserDto> findAll() {

@@ -31,18 +31,6 @@ public class UserController {
         return userService.findById(id);
     }
 
-    @PostMapping("/auth/signup")
-    public Mono<User> signUp(@RequestBody User user) {
-        return userService.create(user);
-    }
-
-    @PostMapping("/auth/signin")
-    public Mono<ResponseEntity<Response>> signIn(@RequestBody Request request) {
-        return userService.signIn(request)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
-    }
-
     @PutMapping("/user/update")
     public Mono<User> update(@RequestBody User user) {
         return userService.update(user);
