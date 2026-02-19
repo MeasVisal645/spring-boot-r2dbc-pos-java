@@ -74,13 +74,15 @@ public class UserServiceImpl implements UserService {
             return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token is required"));
         }
 
-        try {
-            String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
-            return Mono.just(new Response(newAccessToken, null));
-        } catch (Exception e) {
+        // validate first (optional but clearer)
+        if (!jwtUtil.validateToken(refreshToken) || !jwtUtil.isRefreshToken(refreshToken)) {
             return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token"));
         }
+
+        String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
+        return Mono.just(new Response(newAccessToken, null));
     }
+
 
 
     @Override
