@@ -25,6 +25,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -69,7 +70,7 @@ public class OrderItemServiceImpl implements OrderItemService {
 //    }
 
     @Override
-    public Flux<SalesData> findAllSales(LocalDateTime startDate, LocalDateTime endDate) {
+    public Flux<SalesData> findAllSales(LocalDate startDate, LocalDate endDate) {
 
         return r2dbcEntityTemplate.select(OrderItem.class)
                 .matching(Query.query(
@@ -89,7 +90,7 @@ public class OrderItemServiceImpl implements OrderItemService {
                                 .map(OrderDetail::getTotal)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                                 .map(total ->
-                                        new SalesData(total, orderItem.getCreatedDate())
+                                        new SalesData(total, orderItem.getCreatedDate().toLocalDate())
                                 )
                 );
 

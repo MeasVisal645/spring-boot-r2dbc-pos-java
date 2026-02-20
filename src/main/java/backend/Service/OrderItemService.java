@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public interface OrderItemService {
     Flux<OrderDetails> findAll();
 
     Flux<OrderItem> findByDate(LocalDateTime startDate, LocalDateTime endDate);
-    Flux<SalesData> findAllSales(LocalDateTime startDate, LocalDateTime endDate);
+    Flux<SalesData> findAllSales(LocalDate startDate, LocalDate endDate);
     Mono<PageResponse<OrderDetails>> findPagination(Integer pageNumber, Integer pageSize);
     Mono<List<OrderDetail>> createOrder(List<OrderRequest> orderRequest);
 }
