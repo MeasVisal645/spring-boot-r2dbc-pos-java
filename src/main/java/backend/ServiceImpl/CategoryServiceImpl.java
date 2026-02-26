@@ -8,10 +8,7 @@ import backend.Mapper.CategoryMapper;
 import backend.Mapper.ProductMapper;
 import backend.Repository.CategoryRepository;
 import backend.Service.CategoryService;
-import backend.Utils.FilteredWithNestedPaginationUtils;
-import backend.Utils.NestedPaginationUtils;
-import backend.Utils.PageResponse;
-import backend.Utils.PaginationUtils;
+import backend.Utils.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
@@ -94,16 +91,28 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Mono<PageResponse<CategoryDto>> findPagination(Integer pageNumber, Integer pageSize) {
-        return PaginationUtils.fetchPagedResponse(
+    public Mono<PageResponse<CategoryDto>> findPagination(Integer pageNumber, Integer pageSize, String search, Boolean isActive) {
+        Criteria criteria = Criteria.empty();
+
+        if (isActive != null) {
+            criteria = criteria.and(Category.IS_ACTIVE_COLUMN).is(isActive);
+        }
+
+        if (search != null && !search.isBlank()) {
+            criteria = criteria.and(Category.NAME_COLUMN).like("%" + search + "%");
+        }
+
+        return FilteredWithPaginationUtils.fetch(
                 r2dbcEntityTemplate,
                 Category.class,
-                CategoryMapper::toDto,
+                criteria,
                 Optional.ofNullable(pageNumber).orElse(PaginationUtils.DEFAULT_PAGE_NUMBER),
                 Optional.ofNullable(pageSize).orElse(PaginationUtils.DEFAULT_LIMIT),
-                Criteria.where(Category.IS_ACTIVE_COLUMN).isTrue(),
-                Sort.by(Sort.Order.desc(Category.CREATED_DATE_COLUMN),
-                        Sort.Order.desc(Category.UPDATED_DATE_COLUMN))
+                Sort.by(
+                        Sort.Order.desc(Category.CREATED_DATE_COLUMN),
+                        Sort.Order.desc(Category.UPDATED_DATE_COLUMN)
+                ),
+                CategoryMapper::toDto
         );
     }
 }

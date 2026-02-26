@@ -44,7 +44,16 @@ public class CategoryController {
     }
 
     @GetMapping
-    public Mono<PageResponse<CategoryDto>> findPagination(@RequestParam Integer pageNumber, Integer pageSize) {
-        return categoryService.findPagination(pageNumber, pageSize);
+    public Mono<PageResponse<CategoryDto>> findPagination(
+            @RequestParam Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean isActive) {
+        return categoryService.findPagination(
+                pageNumber,
+                pageSize,
+                search,
+                isActive
+        );
     }
 }

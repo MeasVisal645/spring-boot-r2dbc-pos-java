@@ -18,5 +18,5 @@ public interface CategoryService {
     Mono<Category> update(Category category);
     Mono<Long> delete(Long id);
 
-    Mono<PageResponse<CategoryDto>> findPagination(Integer pageNumber, Integer pageSize);
+    Mono<PageResponse<CategoryDto>> findPagination(Integer pageNumber, Integer pageSize, String search, Boolean isActive);
 }
