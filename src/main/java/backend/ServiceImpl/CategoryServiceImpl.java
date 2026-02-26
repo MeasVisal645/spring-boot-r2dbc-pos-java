@@ -106,33 +106,4 @@ public class CategoryServiceImpl implements CategoryService {
                         Sort.Order.desc(Category.UPDATED_DATE_COLUMN))
         );
     }
-
-    @Override
-    public Mono<PageResponse<CategoryProduct>> searchFiltered(String search, Integer pageNumber, Integer pageSize) {
-        if (search == null || search.isBlank()) {
-            int limit = (pageSize != null) ? pageSize : 10;
-            return Mono.just(new PageResponse<>(List.of(), 1, limit, 0));
-        }
-
-        // Define search pattern for partial matching
-        String pattern = "%" + search + "%";
-        Criteria criteria = Criteria.where(Category.NAME_COLUMN).like(pattern)
-                .or(Category.CODE_COLUMN).like(pattern);
-
-        return FilteredWithNestedPaginationUtils.fetchFilteredPagination(
-                r2dbcEntityTemplate,
-                Category.class,
-                criteria,
-                pageNumber,
-                pageSize,
-                category -> r2dbcEntityTemplate.select(Product.class)
-                        .matching(Query.query(Criteria.where(Product.CATEGORY_ID_COLUMN).is(category.getId())))
-                        .all()
-                        .collectList(),
-                CategoryProduct::new
-        );
-    }
-
-
-
 }
