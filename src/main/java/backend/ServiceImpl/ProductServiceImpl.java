@@ -116,13 +116,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Mono<Long> delete(Long id) {
+    public Mono<Void> delete(Long id) {
         return productRepository.findById(id)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found")))
-                .flatMap(product ->
-                            productRepository.deleteById(id)
-                                    .thenReturn(id)
-                        );
+                .flatMap( product -> {
+                    String oldKey = product.getImageKey();
+
+                    Mono<Void> deleteOld = (oldKey == null || oldKey.isBlank())
+                            ? Mono.empty()
+                            : fileService.deleteFile(oldKey)
+                    .onErrorResume(e -> Mono.empty());
+
+                    return deleteOld
+                            .then(productRepository.deleteById(id));
+                    });
     }
 
     //check existing for generating

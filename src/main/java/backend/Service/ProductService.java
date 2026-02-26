@@ -17,7 +17,7 @@ public interface ProductService {
     Mono<Product> findById(Long id);
     Mono<Product> create(Product product);
     Mono<Product> update(Product product);
-    Mono<Long> delete(Long id);
+    Mono<Void> delete(Long id);
 
     //check existing for generating
     Mono<Boolean> existsByProductCode(String productCode);

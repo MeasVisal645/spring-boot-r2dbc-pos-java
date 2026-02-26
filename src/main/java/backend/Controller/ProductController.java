@@ -43,7 +43,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/delete")
-    public Mono<Long> delete(@RequestParam Long id) {
+    public Mono<Void> delete(@RequestParam Long id) {
         return productService.delete(id);
     }
 
