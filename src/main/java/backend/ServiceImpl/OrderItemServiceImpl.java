@@ -8,10 +8,7 @@ import backend.Repository.OrderDetailRepository;
 import backend.Repository.OrderItemRepository;
 import backend.Service.OrderItemService;
 import backend.Service.UserService;
-import backend.Utils.NestedPaginationUtils;
-import backend.Utils.OrderNoGenerator;
-import backend.Utils.PageResponse;
-import backend.Utils.PaginationUtils;
+import backend.Utils.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
@@ -27,6 +24,7 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,26 +46,6 @@ public class OrderItemServiceImpl implements OrderItemService {
                                 .map(details -> new OrderDetails(orderItem, details))
                 );
     }
-
-    @Override
-    public Flux<OrderItem> findByDate(LocalDateTime startDate, LocalDateTime endDate) {
-        return r2dbcEntityTemplate.select(OrderItem.class)
-                .matching(Query.query(Criteria.where(OrderItem.CREATED_DATE_COLUMN).between(startDate, endDate)))
-                .all();
-    }
-
-//    @Override
-//    public Flux<OrderDetails> findByOrderNo(String orderNo) {
-//        return orderItemRepository.findByOrderNo(orderNo)
-//                .switchIfEmpty(Mono.error(
-//                        new ResponseStatusException(HttpStatus.NOT_FOUND,"Order not found")
-//                ))
-//                .flatMap(orderItem ->
-//                        orderDetailRepository.findByOrderId(orderItem.getId())
-//                                .collectList()
-//                                .map(orderDetails -> new OrderDetails(orderItem, orderDetails))
-//                );
-//    }
 
     @Override
     public Flux<SalesData> findAllSales(LocalDate startDate, LocalDate endDate) {
@@ -95,9 +73,6 @@ public class OrderItemServiceImpl implements OrderItemService {
                 );
 
     }
-
-
-
 
     @Override
     public Mono<PageResponse<OrderDetails>> findPagination(Integer pageNumber, Integer pageSize) {
@@ -176,6 +151,46 @@ public class OrderItemServiceImpl implements OrderItemService {
                         .collectList()
                 )
             );
+    }
+
+    @Override
+    public Mono<PageResponse<OrderDetails>> findPaginationAll(
+            Integer pageNumber,
+            Integer pageSize,
+            LocalDate startDate,
+            LocalDate endDate,
+            String search
+    ) {
+        Criteria criteria = Criteria.where(OrderItem.IS_PAID_COLUMN).isTrue();
+
+        if (startDate != null && endDate != null) {
+            LocalDateTime startDateTime = startDate.atStartOfDay();
+            LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+            criteria = criteria.and(OrderItem.CREATED_DATE_COLUMN)
+                    .between(startDateTime, endDateTime);
+        }
+
+        if (search != null && !search.isBlank()) {
+            criteria = criteria.and(OrderItem.ORDER_NO_COLUMN)
+                    .like("%" + search + "%");
+        }
+
+        return FilteredWithNestedPaginationUtils.fetch(
+                r2dbcEntityTemplate,
+                OrderItem.class,
+                criteria,
+                Optional.ofNullable(pageNumber).orElse(PaginationUtils.DEFAULT_PAGE_NUMBER),
+                Optional.ofNullable(pageSize).orElse(PaginationUtils.DEFAULT_LIMIT),
+                Sort.by(Sort.Order.desc(OrderItem.CREATED_DATE_COLUMN)),
+                orderItem -> r2dbcEntityTemplate.select(OrderDetail.class)
+                        .matching(Query.query(
+                                Criteria.where(OrderDetail.ORDER_ID_COLUMN)
+                                        .is(orderItem.getId())
+                        ))
+                        .all()
+                        .collectList(),
+                OrderDetails::new
+        );
     }
 
 

@@ -19,8 +19,9 @@ public interface OrderItemService {
 
     Flux<OrderDetails> findAll();
 
-    Flux<OrderItem> findByDate(LocalDateTime startDate, LocalDateTime endDate);
     Flux<SalesData> findAllSales(LocalDate startDate, LocalDate endDate);
     Mono<PageResponse<OrderDetails>> findPagination(Integer pageNumber, Integer pageSize);
     Mono<List<OrderDetail>> createOrder(List<OrderRequest> orderRequest);
+
+    Mono<PageResponse<OrderDetails>> findPaginationAll(Integer pageNumber, Integer pageSize, LocalDate startDate, LocalDate endDate, String search);
 }

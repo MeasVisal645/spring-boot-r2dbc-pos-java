@@ -32,11 +32,6 @@ public class OrderItemController {
         return orderItemService.findAll();
     }
 
-    @GetMapping("/filter")
-    public Flux<OrderItem> findByDate(@RequestParam LocalDateTime startDate, @RequestParam LocalDateTime endDate) {
-        return orderItemService.findByDate(startDate, endDate);
-    }
-
     @GetMapping("/date")
     public Flux<SalesData> findAllSales(
             @RequestParam LocalDate startDate,
@@ -46,7 +41,7 @@ public class OrderItemController {
     }
 
 
-    @GetMapping
+    @GetMapping("/page")
     public Mono<PageResponse<OrderDetails>> findPagination(@RequestParam Integer pageNumber, Integer pageSize) {
         return orderItemService.findPagination(pageNumber, pageSize);
     }
@@ -54,6 +49,17 @@ public class OrderItemController {
     @PostMapping("/create")
     public Mono<List<OrderDetail>> create(@RequestBody List<OrderRequest> orderRequest) {
         return orderItemService.createOrder(orderRequest);
+    }
+
+    @GetMapping
+    public Mono<PageResponse<OrderDetails>> findPagination(
+            @RequestParam Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String search
+        ) {
+        return orderItemService.findPaginationAll(pageNumber, pageSize, startDate, endDate, search);
     }
 
 }
