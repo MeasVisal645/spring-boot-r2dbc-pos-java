@@ -3,6 +3,7 @@ package backend.ServiceImpl;
 import backend.Dto.AddQuantity;
 import backend.Dto.EmployeeDto;
 import backend.Dto.ProductDto;
+import backend.Entities.Category;
 import backend.Entities.Method;
 import backend.Entities.Product;
 import backend.Entities.QuantityAdjustment;
@@ -14,6 +15,7 @@ import backend.Repository.ProductRepository;
 import backend.Service.FileService;
 import backend.Service.ProductService;
 import backend.Service.UserService;
+import backend.Utils.FilteredWithPaginationUtils;
 import backend.Utils.PageResponse;
 import backend.Utils.PaginationUtils;
 import backend.Utils.RepositoryUtils;
@@ -141,15 +143,26 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Mono<PageResponse<ProductDto>> findPagination(Integer pageNumber, Integer pageSize) {
-        return PaginationUtils.fetchPagedResponse(
+    public Mono<PageResponse<ProductDto>> findPagination(Integer pageNumber, Integer pageSize, String search, Boolean isActive) {
+        Criteria criteria = Criteria.empty();
+
+        if (isActive != null) {
+            criteria = criteria.and(Category.IS_ACTIVE_COLUMN).is(isActive);
+        }
+
+        if (search != null && !search.isBlank()) {
+            criteria = criteria.and(Category.NAME_COLUMN).like("%" + search + "%");
+        }
+
+        return FilteredWithPaginationUtils.fetch(
                 r2dbcEntityTemplate,
                 Product.class,
-                ProductMapper::toDto,
+                criteria,
                 Optional.ofNullable(pageNumber).orElse(PaginationUtils.DEFAULT_PAGE_NUMBER),
                 Optional.ofNullable(pageSize).orElse(PaginationUtils.DEFAULT_LIMIT),
-                Criteria.where(Product.IS_ACTIVE_COLUMN).isTrue(),
-                Sort.by(Sort.Order.desc(Product.CREATED_DATE_COLUMN))
+                Sort.by(Sort.Order.desc(Product.CREATED_DATE_COLUMN)),
+                ProductMapper::toDto
+
         );
     }
 

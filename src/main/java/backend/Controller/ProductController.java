@@ -58,9 +58,15 @@ public class ProductController {
     //Pagination
     @GetMapping
     public Mono<PageResponse<ProductDto>> findPagination(
-            @RequestParam("pageNumber") Integer pageNumber, Integer pageSize) {
-        return productService.findPagination(pageNumber, pageSize);
-
+            @RequestParam(required = false) Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean isActive) {
+        return productService.findPagination(
+                pageNumber,
+                pageSize,
+                search,
+                isActive);
     }
 
     @PutMapping("/add-quantity/{id}")

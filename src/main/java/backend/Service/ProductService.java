@@ -21,7 +21,7 @@ public interface ProductService {
 
     //check existing for generating
     Mono<Boolean> existsByProductCode(String productCode);
-    Mono<PageResponse<ProductDto>> findPagination(Integer pageNumber, Integer pageSize);
+    Mono<PageResponse<ProductDto>> findPagination(Integer pageNumber, Integer pageSize, String search, Boolean isActive);
     Mono<Product> addQuantity(Long id, AddQuantity dto);
     Mono<Product> createWithImage(Product product, Mono<FilePart> file);
     Mono<String> updateImage(Long id, FilePart file);
