@@ -14,7 +14,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -58,6 +60,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public Mono<Expense> update(Expense expense) {
         return expenseRepository.findById(expense.getId())
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense not found")))
                 .flatMap(existing -> {
                     Expense.update(existing, expense);
                     return expenseRepository.save(existing);
@@ -66,7 +69,8 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public Mono<Void> delete(Long id) {
-        return expenseRepository.deleteById(id);
+        return expenseRepository.deleteById(id)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense not found")));
     }
 
     @Override
