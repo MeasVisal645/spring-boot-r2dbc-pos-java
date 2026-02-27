@@ -59,4 +59,13 @@ public class Expense {
                 .isComplete(expense.isComplete())
                 .userId(expense.getUserId());
     }
+
+    public static Expense update(Expense existing, Expense updated) {
+        existing.setReference(updated.getReference());
+        existing.setCategory(updated.getCategory());
+        existing.setNote(updated.getNote());
+        existing.setAmount(updated.getAmount());
+        existing.setComplete(updated.isComplete());
+        return existing;
+    }
 }

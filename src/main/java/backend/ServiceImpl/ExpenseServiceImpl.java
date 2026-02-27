@@ -2,10 +2,12 @@ package backend.ServiceImpl;
 
 import backend.Entities.Expense;
 import backend.Dto.ExpenseDto;
+import backend.Entities.OrderItem;
 import backend.Mapper.ExpenseMapper;
 import backend.Repository.ExpenseRepository;
 import backend.Service.ExpenseService;
 import backend.Service.UserService;
+import backend.Utils.FilteredWithPaginationUtils;
 import backend.Utils.PageResponse;
 import backend.Utils.PaginationUtils;
 import lombok.AllArgsConstructor;
@@ -16,7 +18,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Optional;
 
 @Service
@@ -30,6 +34,11 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public Flux<Expense> findAll() {
         return expenseRepository.findAll();
+    }
+
+    @Override
+    public Mono<Expense> findById(Long id) {
+        return expenseRepository.findById(id);
     }
 
     @Override
@@ -47,15 +56,44 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public Mono<PageResponse<ExpenseDto>> findPagination(Integer pageNumber, Integer pageSize) {
-        return PaginationUtils.fetchPagedResponse(
+    public Mono<Expense> update(Expense expense) {
+        return expenseRepository.findById(expense.getId())
+                .flatMap(existing -> {
+                    Expense.update(existing, expense);
+                    return expenseRepository.save(existing);
+                });
+    }
+
+    @Override
+    public Mono<Void> delete(Long id) {
+        return expenseRepository.deleteById(id);
+    }
+
+    @Override
+    public Mono<PageResponse<ExpenseDto>> findPagination(Integer pageNumber, Integer pageSize, LocalDate startDate, LocalDate endDate, String search) {
+        Criteria criteria = Criteria.where(Expense.IS_COMPLETE_COLUMN).isTrue();
+
+        if (startDate != null && endDate != null) {
+            LocalDateTime startDateTime = startDate.atStartOfDay();
+            LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+
+            criteria = criteria.and(Expense.CREATED_DATE_COLUMN).between(startDateTime, endDateTime);
+        }
+
+        if (search != null && !search.isBlank()) {
+            criteria = criteria.and(Expense.NOTE_COLUMN).like("%" + search + "%")
+                    .or(Expense.REFERENCE_COLUMN).like("%" + search + "%")
+                    .or(Expense.CATEGORY_COLUMN).like("%" + search + "%");
+        }
+
+        return FilteredWithPaginationUtils.fetch(
                 r2dbcEntityTemplate,
                 Expense.class,
-                ExpenseMapper::toDto,
+                criteria,
                 Optional.ofNullable(pageNumber).orElse(PaginationUtils.DEFAULT_PAGE_NUMBER),
                 Optional.ofNullable(pageSize).orElse(PaginationUtils.DEFAULT_LIMIT),
-                Criteria.where(Expense.IS_COMPLETE_COLUMN).isTrue(),
-                Sort.by(Sort.Order.desc(Expense.CREATED_DATE_COLUMN))
+                Sort.by(Sort.Order.desc(OrderItem.CREATED_DATE_COLUMN)),
+                ExpenseMapper::toDto
         );
     }
 }
