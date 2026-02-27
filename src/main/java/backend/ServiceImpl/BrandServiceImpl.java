@@ -1,9 +1,12 @@
 package backend.ServiceImpl;
 
+import backend.Dto.BrandDto;
 import backend.Entities.Brand;
 import backend.Entities.Category;
+import backend.Mapper.BrandMapper;
 import backend.Repository.BrandRepository;
 import backend.Service.BrandService;
+import backend.Utils.FilteredWithPaginationUtils;
 import backend.Utils.PageResponse;
 import backend.Utils.PaginationUtils;
 import lombok.AllArgsConstructor;
@@ -58,14 +61,25 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
-    public Mono<PageResponse<Brand>> findPagination(Integer pageNumber, Integer pageSize) {
-        return PaginationUtils.fetchPagedResponse(
+    public Mono<PageResponse<BrandDto>> findPagination(Integer pageNumber, Integer pageSize, String search, Boolean isActive) {
+        Criteria criteria = Criteria.empty();
+
+        if (isActive != null) {
+            criteria = criteria.and(Criteria.where(Brand.IS_ACTIVE_COLUMN).is(isActive));
+        }
+
+        if (search != null && !search.isEmpty()) {
+            criteria = criteria.or(Criteria.where(Brand.NAME_COLUMN).like("%" + search + "%"));
+        }
+
+        return FilteredWithPaginationUtils.fetch(
                 r2dbcEntityTemplate,
                 Brand.class,
+                criteria,
                 Optional.ofNullable(pageNumber).orElse(PaginationUtils.DEFAULT_PAGE_NUMBER),
                 Optional.ofNullable(pageSize).orElse(PaginationUtils.DEFAULT_LIMIT),
-                null,
-                Sort.by(Sort.Order.desc(Brand.NAME_COLUMN))
+                Sort.by(Sort.Order.desc(Brand.NAME_COLUMN)),
+                BrandMapper::toDto
         );
     }
 }

@@ -1,5 +1,6 @@
 package backend.Controller;
 
+import backend.Dto.BrandDto;
 import backend.Entities.Brand;
 import backend.Service.BrandService;
 import backend.Utils.PageResponse;
@@ -27,8 +28,18 @@ public class BrandController {
     }
 
     @GetMapping
-    public Mono<PageResponse<Brand>> findPagination(@RequestParam Integer pageNumber, Integer pageSize) {
-        return brandService.findPagination(pageNumber, pageSize);
+    public Mono<PageResponse<BrandDto>> findPagination(
+            @RequestParam(required = false) Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean isActive
+    ) {
+        return brandService.findPagination(
+                pageNumber,
+                pageSize,
+                search,
+                isActive
+        );
     }
 
     @PostMapping("/create")
