@@ -1,9 +1,10 @@
 package backend.ServiceImpl;
 
 import backend.Dto.SupplierDetails;
-import backend.Entities.OrderItem;
+import backend.Dto.SupplierDto;
 import backend.Entities.Supplier;
 import backend.Entities.SupplierContact;
+import backend.Mapper.SupplierMapper;
 import backend.Repository.SupplierRepository;
 import backend.Service.SupplierService;
 import backend.Utils.NestedPaginationUtils;
@@ -48,8 +49,9 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
-    public Flux<Supplier> findAll() {
-        return supplierRepository.findAll();
+    public Flux<SupplierDto> findAll() {
+        return supplierRepository.findAll()
+                .map(SupplierMapper::toDto);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package backend.Controller;
 
 import backend.Dto.SupplierDetails;
+import backend.Dto.SupplierDto;
 import backend.Entities.Supplier;
 import backend.Service.SupplierService;
 import backend.Utils.PageResponse;
@@ -18,7 +19,7 @@ public class SupplierController {
     private final SupplierService supplierService;
 
     @GetMapping("/all")
-    public Flux<Supplier> findAll() {
+    public Flux<SupplierDto> findAll() {
         return supplierService.findAll();
     }
 
