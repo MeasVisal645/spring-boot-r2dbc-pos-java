@@ -24,6 +24,8 @@ public class PurchaseOrder {
     public static final String SUPPLIER_ID_COLUMN = "supplierId";
     public static final String ORDER_DATE_COLUMN = "orderDate";
     public static final String STATUS_COLUMN = "status";
+    public static final String CREATED_DATE_COLUMN = "createdDate";
+    public static final String UPDATED_DATE_COLUMN = "updatedDate";
 
     @Id
     @Column(ID_COLUMN)
@@ -35,6 +37,12 @@ public class PurchaseOrder {
     private LocalDateTime orderDate;
     @Column(STATUS_COLUMN)
     private Status status;
+    @Column(CREATED_DATE_COLUMN)
+    @JsonSerialize(using = DateStringUtils.class)
+    private LocalDateTime createdDate;
+    @Column(UPDATED_DATE_COLUMN)
+    @JsonSerialize(using = DateStringUtils.class)
+    private LocalDateTime updatedDate;
 
     public static PurchaseOrderBuilder from(PurchaseOrder purchaseOrder) {
         return PurchaseOrder.builder()
@@ -42,5 +50,12 @@ public class PurchaseOrder {
                 .supplierId(purchaseOrder.getSupplierId())
                 .orderDate(purchaseOrder.getOrderDate())
                 .status(purchaseOrder.getStatus());
+    }
+
+    public static PurchaseOrder update(PurchaseOrder existing, PurchaseOrder updated) {
+        existing.setSupplierId(updated.getSupplierId());
+        existing.setOrderDate(updated.getOrderDate());
+        existing.setStatus(updated.getStatus());
+        return existing;
     }
 }

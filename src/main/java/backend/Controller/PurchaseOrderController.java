@@ -1,5 +1,6 @@
 package backend.Controller;
 
+import backend.Dto.PurchaseOrderDetails;
 import backend.Dto.PurchaseOrderRequest;
 import backend.Dto.PurchaseOrderStatus;
 import backend.Entities.PurchaseOrder;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -22,7 +24,6 @@ import java.util.List;
 public class PurchaseOrderController {
 
     private final PurchaseOrderService purchaseOrderService;
-    private final PurchaseOrderDetailService purchaseOrderDetailService;
 
     @GetMapping("/all")
     public Flux<PurchaseOrder> findAll() {
@@ -34,14 +35,14 @@ public class PurchaseOrderController {
         return purchaseOrderService.findById(id);
     }
 
-    @GetMapping
-    public Mono<PageResponse<PurchaseOrder>> findPagination(@RequestParam Integer pageNumber, Integer pageSize) {
-        return purchaseOrderService.findPagination(pageNumber, pageSize);
-    }
-
     @PostMapping("/create")
     public Mono<List<PurchaseOrderDetail>> createPurchaseOrder(@RequestBody PurchaseOrderRequest request) {
         return purchaseOrderService.create(request);
+    }
+
+    @PutMapping("/update")
+    public Mono<PurchaseOrder> updatePurchaseOrder(@RequestBody PurchaseOrder purchaseOrder) {
+        return purchaseOrderService.update(purchaseOrder);
     }
 
     @PutMapping("/{id}/status")
@@ -49,4 +50,23 @@ public class PurchaseOrderController {
         return purchaseOrderService.updateStatus(id, status.status());
     }
 
+    @DeleteMapping("/delete/{id}")
+    public Mono<Void> deletePurchaseOrder(@PathVariable Long id) {
+        return purchaseOrderService.delete(id);
+    }
+
+    @GetMapping
+    public Mono<PageResponse<PurchaseOrderDetails>> findPagination(
+            @RequestParam(required = false) Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String status) {
+        return purchaseOrderService.findPagination(
+                pageNumber,
+                pageSize,
+                startDate,
+                endDate,
+                status);
+    }
 }

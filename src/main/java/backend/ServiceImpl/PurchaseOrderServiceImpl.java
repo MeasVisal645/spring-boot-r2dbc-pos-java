@@ -1,17 +1,16 @@
 package backend.ServiceImpl;
 
+import backend.Dto.OrderDetails;
 import backend.Dto.PurchaseOrderDetails;
 import backend.Dto.PurchaseOrderRequest;
 import backend.Dto.PurchaseOrderStatus;
-import backend.Entities.PurchaseOrder;
-import backend.Entities.PurchaseOrderDetail;
-import backend.Entities.Status;
-import backend.Entities.Supplier;
+import backend.Entities.*;
 import backend.Repository.OrderDetailRepository;
 import backend.Repository.PurchaseOrderDetailRepository;
 import backend.Repository.PurchaseOrderRepository;
 import backend.Repository.SupplierRepository;
 import backend.Service.PurchaseOrderService;
+import backend.Utils.FilteredWithNestedPaginationUtils;
 import backend.Utils.PageResponse;
 import backend.Utils.PaginationUtils;
 import lombok.AllArgsConstructor;
@@ -27,7 +26,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,18 +49,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     public Mono<PurchaseOrder> findById(Long id) {
         return purchaseOrderRepository.findById(id);
-    }
-
-    @Override
-    public Mono<PageResponse<PurchaseOrder>> findPagination(Integer pageNumber, Integer pageSize) {
-        return PaginationUtils.fetchPagedResponse(
-                r2dbcEntityTemplate,
-                PurchaseOrder.class,
-                Optional.ofNullable(pageNumber).orElse(PaginationUtils.DEFAULT_PAGE_NUMBER),
-                Optional.ofNullable(pageSize).orElse(PaginationUtils.DEFAULT_LIMIT),
-                Criteria.where(PurchaseOrder.STATUS_COLUMN).isTrue(),
-                Sort.by(Sort.Order.by(PurchaseOrder.ORDER_DATE_COLUMN)).descending()
-        );
     }
 
     @Override
@@ -84,7 +73,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                 PurchaseOrder.builder()
                                         .supplierId(req.supplierId())
                                         .status(req.status())
-                                        .orderDate(LocalDateTime.now())
+                                        .orderDate(req.orderDate())
+                                        .createdDate(LocalDateTime.now())
                                         .build()
                         )
                 );
@@ -102,7 +92,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                                 HttpStatus.BAD_REQUEST, "Unit price must be >= 0");
                                     }
 
-                                    BigDecimal lineTotal =
+                                    BigDecimal total =
                                             item.unitPrice().multiply(BigDecimal.valueOf(item.quantity()));
 
                                     return PurchaseOrderDetail.builder()
@@ -110,12 +100,22 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                             .productId(item.productId())
                                             .quantity(item.quantity())
                                             .unitPrice(item.unitPrice())
-                                            .totalPrice(lineTotal)
+                                            .totalPrice(total)
                                             .build();
                                 })
                                 .flatMap(purchaseOrderDetailRepository::save)
                 )
                 .collectList();
+    }
+
+    @Override
+    public Mono<PurchaseOrder> update(PurchaseOrder purchaseOrder) {
+        return purchaseOrderRepository.findById(purchaseOrder.getId())
+                .flatMap(existing -> {
+                    PurchaseOrder.update(existing, purchaseOrder);
+                    existing.setUpdatedDate(LocalDateTime.now());
+                    return purchaseOrderRepository.save(existing);
+                });
     }
 
     @Override
@@ -131,5 +131,44 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                             .matching(Query.query(Criteria.where(PurchaseOrder.ID_COLUMN).is(id)))
                             .one();
                 });
+    }
+
+    @Override
+    public Mono<Void> delete(Long id) {
+        return purchaseOrderRepository.deleteById(id)
+                .then(purchaseOrderDetailRepository.deleteByPurchaseId(id));
+    }
+
+    @Override
+    public Mono<PageResponse<PurchaseOrderDetails>> findPagination(Integer pageNumber, Integer pageSize, LocalDate startDate, LocalDate endDate, String status) {
+        Criteria criteria = Criteria.empty();
+
+        if (status != null) {
+            criteria = criteria.and(PurchaseOrder.STATUS_COLUMN).is(status);
+        }
+
+        if (startDate != null && endDate != null) {
+            LocalDateTime startDateTime = startDate.atStartOfDay();
+            LocalDateTime endDateTime = endDate.plusDays(1).atStartOfDay().minusNanos(1);
+            criteria = criteria.and(PurchaseOrder.ORDER_DATE_COLUMN)
+                    .between(startDateTime, endDateTime);
+        }
+
+        return FilteredWithNestedPaginationUtils.fetch(
+                r2dbcEntityTemplate,
+                PurchaseOrder.class,
+                criteria,
+                Optional.ofNullable(pageNumber).orElse(PaginationUtils.DEFAULT_PAGE_NUMBER),
+                Optional.ofNullable(pageSize).orElse(PaginationUtils.DEFAULT_LIMIT),
+                Sort.by(Sort.Order.desc(PurchaseOrder.ORDER_DATE_COLUMN)),
+                purchaseOrder -> r2dbcEntityTemplate.select(PurchaseOrderDetail.class)
+                        .matching(Query.query(
+                                Criteria.where(PurchaseOrderDetail.PURCHASE_ID_COLUMN)
+                                        .is(purchaseOrder.getId())
+                        ))
+                        .all()
+                        .collectList(),
+                PurchaseOrderDetails::new
+        );
     }
 }
