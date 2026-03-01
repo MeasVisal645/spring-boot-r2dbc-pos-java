@@ -35,7 +35,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public Mono<Response> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
-        System.out.println("COOKIE refreshToken = " + refreshToken);
+//        System.out.println("COOKIE refreshToken = " + refreshToken);
         return userService.refreshToken(refreshToken);
     }
 }
