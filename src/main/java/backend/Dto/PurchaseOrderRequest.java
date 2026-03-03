@@ -8,11 +8,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record PurchaseOrderRequest(
-
         Long supplierId,
         Status status,
         LocalDateTime orderDate,
         List<PurchaseItemRequest> items
-
 ) {
 }

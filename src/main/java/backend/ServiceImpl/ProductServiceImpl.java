@@ -46,40 +46,45 @@ public class ProductServiceImpl implements ProductService {
     private final FileService fileService;
     private final String publicUrl;
     private final R2dbcEntityTemplate r2dbcEntityTemplate;
+    private final RepositoryUtils repositoryUtils;
 
-    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository, UserService userService, FileService fileService,@Value("${r2.publicUrl}") String publicUrl, R2dbcEntityTemplate r2dbcEntityTemplate) {
+    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository, UserService userService, FileService fileService,@Value("${r2.publicUrl}") String publicUrl, R2dbcEntityTemplate r2dbcEntityTemplate, RepositoryUtils repositoryUtils) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.userService = userService;
         this.fileService = fileService;
         this.publicUrl = publicUrl;
         this.r2dbcEntityTemplate = r2dbcEntityTemplate;
+        this.repositoryUtils = repositoryUtils;
     }
-
 
     @Override
     public Flux<ProductDto> findAll() {
-        return productRepository.findAll()
+        return repositoryUtils.findAllActive(
+                    r2dbcEntityTemplate,
+                    Product.class,
+                    Product.IS_ACTIVE_COLUMN,
+                    Product.LABEL)
                 .map(ProductMapper::toDto);
     }
 
     @Override
     public Mono<Product> findById(Long id) {
-        return productRepository.findById(id);
+        return repositoryUtils.findById(
+                    r2dbcEntityTemplate,
+                    Product.class,
+                    Product.ID_COLUMN,
+                    id,
+                    Product.IS_ACTIVE_COLUMN,
+                    Product.LABEL
+            );
     }
 
     @Override
     public Mono<Product> create(Product product) {
         return categoryRepository.findById(product.getCategoryId())  //Check category exists
-                .switchIfEmpty(Mono.error(
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Category not found"
-                        )
-                ))
-                .flatMap(category ->
-                        productRepository.existsByCode(product.getCode())  //Check product code exists
-                )
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found")))
+                .flatMap(category -> productRepository.existsByCode(product.getCode()))  //Check product code exists
                 .flatMap(exists -> {
                     if (exists) {
                         return Mono.error(
