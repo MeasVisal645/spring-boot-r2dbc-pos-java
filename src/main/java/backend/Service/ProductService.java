@@ -20,6 +20,7 @@ public interface ProductService {
     Mono<Void> delete(Long id);
 
     //check existing for generating
+    Flux<Product> search(String query);
     Mono<Boolean> existsByProductCode(String productCode);
     Mono<PageResponse<ProductDto>> findPagination(Integer pageNumber, Integer pageSize, String search, Boolean isActive);
     Mono<Product> addQuantity(Long id, AddQuantity dto);

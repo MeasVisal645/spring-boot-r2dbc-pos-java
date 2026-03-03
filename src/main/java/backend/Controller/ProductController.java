@@ -86,4 +86,9 @@ public class ProductController {
     public Mono<String> updateImage(@PathVariable Long id, @RequestPart("file")FilePart file) {
         return productService.updateImage(id, file);
     }
+
+    @GetMapping("/search")
+    public Flux<Product> search(@RequestParam String query) {
+        return productService.search(query);
+    }
 }

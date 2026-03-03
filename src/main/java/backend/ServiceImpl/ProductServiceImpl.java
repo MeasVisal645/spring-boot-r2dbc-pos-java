@@ -139,6 +139,13 @@ public class ProductServiceImpl implements ProductService {
                     });
     }
 
+    @Override
+    public Flux<Product> search(String query) {
+        return r2dbcEntityTemplate.select(Product.class)
+                .matching(Query.query(Criteria.where(Product.NAME_COLUMN).like("%" + query + "%")))
+                .all();
+    }
+
     //check existing for generating
     @Override
     public Mono<Boolean> existsByProductCode(String code) {
