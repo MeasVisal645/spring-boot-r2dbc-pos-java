@@ -48,4 +48,12 @@ public class PurchaseOrderDetail {
                 .unitPrice(purchaseOrderDetail.getUnitPrice())
                 .totalPrice(purchaseOrderDetail.getTotalPrice());
     }
+
+    public static PurchaseOrderDetail update(PurchaseOrderDetail existing, PurchaseOrderDetail updated) {
+        existing.setProductId(updated.getProductId());
+        existing.setQuantity(updated.getQuantity());
+        existing.setUnitPrice(updated.getUnitPrice());
+        existing.setTotalPrice(updated.getTotalPrice());
+        return existing;
+    }
 }

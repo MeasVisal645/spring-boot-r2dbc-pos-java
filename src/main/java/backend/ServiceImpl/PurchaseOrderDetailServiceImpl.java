@@ -31,8 +31,17 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
     }
 
     @Override
-    public Mono<PageResponse<PurchaseOrderDetail>> findPagination(Integer pageNumber, Integer pageSize) {
-        return null;
+    public Mono<PurchaseOrderDetail> update(PurchaseOrderDetail purchaseOrderDetail) {
+        return purchaseOrderDetailRepository.findById(purchaseOrderDetail.getId())
+                .flatMap(existing -> {
+                    PurchaseOrderDetail.update(existing, purchaseOrderDetail);
+                    return purchaseOrderDetailRepository.save(existing);
+                });
+    }
+
+    @Override
+    public Mono<Void> delete(Long id) {
+        return purchaseOrderDetailRepository.deleteById(id);
     }
 
 }

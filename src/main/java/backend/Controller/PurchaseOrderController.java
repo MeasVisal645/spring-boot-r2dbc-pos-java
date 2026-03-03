@@ -36,12 +36,12 @@ public class PurchaseOrderController {
     }
 
     @PostMapping("/create")
-    public Mono<List<PurchaseOrderDetail>> createPurchaseOrder(@RequestBody PurchaseOrderRequest request) {
+    public Mono<List<PurchaseOrderDetail>> create(@RequestBody PurchaseOrderRequest request) {
         return purchaseOrderService.create(request);
     }
 
     @PutMapping("/update")
-    public Mono<PurchaseOrder> updatePurchaseOrder(@RequestBody PurchaseOrder purchaseOrder) {
+    public Mono<PurchaseOrder> update(@RequestBody PurchaseOrder purchaseOrder) {
         return purchaseOrderService.update(purchaseOrder);
     }
 
@@ -51,7 +51,7 @@ public class PurchaseOrderController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public Mono<Void> deletePurchaseOrder(@PathVariable Long id) {
+    public Mono<Void> delete(@PathVariable Long id) {
         return purchaseOrderService.delete(id);
     }
 

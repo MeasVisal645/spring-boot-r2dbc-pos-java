@@ -139,8 +139,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     public Mono<Void> delete(Long id) {
         return purchaseOrderRepository.deleteById(id)
-                .then(purchaseOrderDetailRepository.deleteByPurchaseId(id))
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
+                .then(purchaseOrderDetailRepository.deleteByPurchaseId(id));
     }
 
     @Override
