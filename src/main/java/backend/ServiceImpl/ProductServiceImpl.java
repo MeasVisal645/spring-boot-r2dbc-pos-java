@@ -70,14 +70,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Mono<Product> findById(Long id) {
-        return repositoryUtils.findById(
-                    r2dbcEntityTemplate,
-                    Product.class,
-                    Product.ID_COLUMN,
-                    id,
-                    Product.IS_ACTIVE_COLUMN,
-                    Product.LABEL
-            );
+        return productRepository.findById(id);
     }
 
     @Override
@@ -106,15 +99,25 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Mono<Product> update(Product product) {
+
+        if (product.getId() == null) {
+            return Mono.error(new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Product id is required"));
+        }
+
+        if (product.getCategoryId() == null) {
+            return Mono.error(new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Category id is required"));
+        }
+
         return categoryRepository.findById(product.getCategoryId())
-                .switchIfEmpty(Mono.error(
-                        new ResponseStatusException(HttpStatus.NOT_FOUND,"Category not found")
-                ))
-                .flatMap(category ->
-                        productRepository.findById(product.getId()))
-                .switchIfEmpty(Mono.error(
-                        new ResponseStatusException(HttpStatus.NOT_FOUND,"Product not found")
-                ))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Category not found")))
+
+                .then(productRepository.findById(product.getId()))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Product not found")))
+
                 .flatMap(existingProduct -> {
                     Product.update(existingProduct, product);
                     existingProduct.setUpdatedDate(LocalDateTime.now());
