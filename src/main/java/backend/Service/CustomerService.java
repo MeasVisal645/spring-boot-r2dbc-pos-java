@@ -16,5 +16,5 @@ public interface CustomerService {
     Mono<Customer> update(Customer customer);
     Mono<Long> delete(Long id);
 
-    Mono<PageResponse<CustomerDto>> findPagination(Integer pageNumber, Integer pageSize);
+    Mono<PageResponse<CustomerDto>> findPagination(Integer pageNumber, Integer pageSize, String search, Boolean isActive);
 }

@@ -43,8 +43,18 @@ public class CustomerController {
     }
 
     @GetMapping
-    public Mono<PageResponse<CustomerDto>> findPagination(@RequestParam Integer pageNumber, Integer pageSize) {
-        return customerService.findPagination(pageNumber, pageSize);
+    public Mono<PageResponse<CustomerDto>> findPagination(
+            @RequestParam(required = false) Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean isActive
+    ) {
+        return customerService.findPagination(
+                pageNumber,
+                pageSize,
+                search,
+                isActive
+        );
     }
 
 }

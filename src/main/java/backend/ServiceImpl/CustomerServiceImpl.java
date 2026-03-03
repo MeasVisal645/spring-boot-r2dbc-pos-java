@@ -2,10 +2,12 @@ package backend.ServiceImpl;
 
 import backend.Dto.CustomerDto;
 import backend.Entities.Brand;
+import backend.Entities.Category;
 import backend.Entities.Customer;
 import backend.Mapper.CustomerMapper;
 import backend.Repository.CustomerRepository;
 import backend.Service.CustomerService;
+import backend.Utils.FilteredWithPaginationUtils;
 import backend.Utils.PageResponse;
 import backend.Utils.PaginationUtils;
 import lombok.AllArgsConstructor;
@@ -69,16 +71,31 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Mono<PageResponse<CustomerDto>> findPagination(Integer pageNumber, Integer pageSize) {
-        return PaginationUtils.fetchPagedResponse(
+    public Mono<PageResponse<CustomerDto>> findPagination(Integer pageNumber, Integer pageSize, String search, Boolean isActive) {
+        Criteria criteria = Criteria.empty();
+
+        if (isActive != null) {
+            criteria = criteria.and(Customer.IS_ACTIVE_COLUMN).is(isActive);
+        }
+
+        if (search != null && !search.isBlank()) {
+            criteria = criteria
+                    .or(Customer.NAME_COLUMN).like("%" + search + "%")
+                    .or(Customer.PHONE_COLUMN).like("%" + search + "%")
+                    .or(Customer.EMAIL_COLUMN).like("%" + search + "%");
+        }
+
+        return FilteredWithPaginationUtils.fetch(
                 r2dbcEntityTemplate,
                 Customer.class,
-                CustomerMapper::toDto,
+                criteria,
                 Optional.ofNullable(pageNumber).orElse(PaginationUtils.DEFAULT_PAGE_NUMBER),
                 Optional.ofNullable(pageSize).orElse(PaginationUtils.DEFAULT_LIMIT),
-                Criteria.where(Customer.IS_ACTIVE_COLUMN).isTrue(),
-                Sort.by(Sort.Order.desc(Customer.CREATED_DATE_COLUMN),
-                        Sort.Order.desc(Customer.UPDATED_DATE_COLUMN))
+                Sort.by(
+                        Sort.Order.desc(Category.CREATED_DATE_COLUMN),
+                        Sort.Order.desc(Category.UPDATED_DATE_COLUMN)
+                ),
+                CustomerMapper::toDto
         );
     }
 }

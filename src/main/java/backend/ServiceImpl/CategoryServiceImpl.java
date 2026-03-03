@@ -31,11 +31,17 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final R2dbcEntityTemplate r2dbcEntityTemplate;
+    private final RepositoryUtils repositoryUtils;
 
     @Override
     public Flux<CategoryDto> findAll() {
-        return categoryRepository.findAll()
-                .map(CategoryMapper::toDto);
+        return repositoryUtils.findAllActive(
+                    r2dbcEntityTemplate,
+                    Category.class,
+                    Category.IS_ACTIVE_COLUMN,
+                    Category.LABEL
+            )
+            .map(CategoryMapper::toDto);
     }
 
     @Override
@@ -73,6 +79,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Mono<Category> update(Category category) {
         return categoryRepository.findById(category.getId())
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found")))
                 .flatMap(existingCategory -> {
                     Category.update(existingCategory, category)
                             .setUpdatedDate(LocalDateTime.now());
