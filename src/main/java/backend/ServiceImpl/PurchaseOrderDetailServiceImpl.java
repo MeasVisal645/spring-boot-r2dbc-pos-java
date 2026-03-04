@@ -31,6 +31,13 @@ public class PurchaseOrderDetailServiceImpl implements PurchaseOrderDetailServic
     }
 
     @Override
+    public Mono<PurchaseOrderDetail> create(PurchaseOrderDetail purchaseOrderDetail) {
+        return purchaseOrderDetailRepository
+                .save(PurchaseOrderDetail.from(purchaseOrderDetail)
+                .build());
+    }
+
+    @Override
     public Mono<PurchaseOrderDetail> update(PurchaseOrderDetail purchaseOrderDetail) {
         return purchaseOrderDetailRepository.findById(purchaseOrderDetail.getId())
                 .flatMap(existing -> {

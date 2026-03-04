@@ -25,6 +25,11 @@ public class PurchaseOrderDetailController {
         return purchaseOrderDetailService.findById(id);
     }
 
+    @PostMapping("/create")
+    public Mono<PurchaseOrderDetail> create(@RequestBody PurchaseOrderDetail purchaseOrderDetail) {
+        return purchaseOrderDetailService.create(purchaseOrderDetail);
+    }
+
     @PutMapping("/update")
     public Mono<PurchaseOrderDetail> update(@RequestBody PurchaseOrderDetail purchaseOrderDetail) {
         return purchaseOrderDetailService.update(purchaseOrderDetail);

@@ -11,6 +11,7 @@ public interface PurchaseOrderDetailService {
 
     Flux<PurchaseOrderDetail> findAll();
     Mono<PurchaseOrderDetail> findById(Long id);
+    Mono<PurchaseOrderDetail> create(PurchaseOrderDetail purchaseOrderDetail);
     Mono<PurchaseOrderDetail> update(PurchaseOrderDetail purchaseOrderDetail);
     Mono<Void> delete(Long id);
 
