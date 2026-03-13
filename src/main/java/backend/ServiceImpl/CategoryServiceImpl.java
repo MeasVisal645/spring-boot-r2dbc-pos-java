@@ -1,11 +1,8 @@
 package backend.ServiceImpl;
 
 import backend.Dto.CategoryDto;
-import backend.Dto.CategoryProduct;
 import backend.Entities.Category;
-import backend.Entities.Product;
 import backend.Mapper.CategoryMapper;
-import backend.Mapper.ProductMapper;
 import backend.Repository.CategoryRepository;
 import backend.Service.CategoryService;
 import backend.Utils.*;
@@ -13,16 +10,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
-import org.springframework.data.relational.core.query.Query;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -36,27 +30,31 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Flux<CategoryDto> findAll() {
         return repositoryUtils.findAllActive(
-                    r2dbcEntityTemplate,
-                    Category.class,
-                    Category.IS_ACTIVE_COLUMN,
-                    Category.LABEL
-            )
-            .map(CategoryMapper::toDto);
+                        r2dbcEntityTemplate,
+                        Category.class,
+                        Category.IS_ACTIVE_COLUMN,
+                        Category.LABEL
+                )
+                .map(CategoryMapper::toDto);
     }
 
     @Override
-    public Mono<Category> findById(Long id) {
+    public Mono<ResponseDTO<Category>> findById(Long id) {
         return categoryRepository.findById(id)
                 .switchIfEmpty(Mono.error(
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Category not found with id: " + id
-                        )
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found with id: " + id)
+                ))
+                .map(category -> new ResponseDTO<>(
+                        HttpStatus.OK,
+                        HttpStatus.OK.value(),
+                        "Category retrieved successfully",
+                        null,
+                        category
                 ));
     }
 
     @Override
-    public Mono<Category> create(Category category) {
+    public Mono<ResponseDTO<Category>> create(Category category) {
         return categoryRepository.existsByCode(category.getCode())
                 .flatMap(exists -> {
                     if (exists) {
@@ -72,29 +70,49 @@ public class CategoryServiceImpl implements CategoryService {
                                     .isActive(true)
                                     .build()
                     );
-                });
+                })
+                .map(saved -> new ResponseDTO<>(
+                        HttpStatus.CREATED,
+                        HttpStatus.CREATED.value(),
+                        "Category created successfully",
+                        null,
+                        saved
+                ));
     }
 
-
     @Override
-    public Mono<Category> update(Category category) {
+    public Mono<ResponseDTO<Category>> update(Category category) {
         return categoryRepository.findById(category.getId())
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found")))
                 .flatMap(existingCategory -> {
                     Category.update(existingCategory, category)
                             .setUpdatedDate(LocalDateTime.now());
                     return categoryRepository.save(existingCategory);
-                });
+                })
+                .map(updated -> new ResponseDTO<>(
+                        HttpStatus.OK,
+                        HttpStatus.OK.value(),
+                        "Category updated successfully",
+                        null,
+                        updated
+                ));
     }
 
     @Override
-    public Mono<Long> delete(Long id) {
+    public Mono<ResponseDTO<Long>> delete(Long id) {
         return categoryRepository.findById(id)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found")))
                 .flatMap(category ->
                         categoryRepository.deleteById(id)
                                 .thenReturn(id)
-                );
+                )
+                .map(deletedId -> new ResponseDTO<>(
+                        HttpStatus.OK,
+                        HttpStatus.OK.value(),
+                        "Category deleted successfully",
+                        null,
+                        deletedId
+                ));
     }
 
     @Override

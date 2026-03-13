@@ -63,7 +63,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Mono<Long> delete(Long id) {
         return customerRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found")))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")))
                 .flatMap(customer ->
                         customerRepository.deleteById(id)
                                 .thenReturn(id)

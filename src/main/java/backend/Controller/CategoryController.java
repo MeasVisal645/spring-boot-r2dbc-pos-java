@@ -5,6 +5,7 @@ import backend.Dto.CategoryProduct;
 import backend.Entities.Category;
 import backend.Service.CategoryService;
 import backend.Utils.PageResponse;
+import backend.Utils.ResponseDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -24,22 +25,22 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public Mono<Category> findById(@PathVariable Long id) {
+    public Mono<ResponseDTO<Category>> findById(@PathVariable Long id) {
         return categoryService.findById(id);
     }
 
     @PostMapping("/create")
-    public Mono<Category> create(@RequestBody Category category) {
+    public Mono<ResponseDTO<Category>> create(@RequestBody Category category) {
         return categoryService.create(category);
     }
 
     @PutMapping("/update")
-    public Mono<Category> update(@RequestBody Category category) {
+    public Mono<ResponseDTO<Category>> update(@RequestBody Category category) {
         return categoryService.update(category);
     }
 
     @DeleteMapping("/delete")
-    public Mono<Long> delete(@RequestParam Long id) {
+    public Mono<ResponseDTO<Long>> delete(@RequestParam Long id) {
         return categoryService.delete(id);
     }
 
